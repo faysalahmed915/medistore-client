@@ -69,7 +69,7 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
             </CardHeader>
             <CardContent>
                 <form
-                    id="login-form"
+                    id="register-form"
                     onSubmit={(e) => {
                         e.preventDefault();
                         form.handleSubmit();
@@ -147,7 +147,7 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
                 </form>
             </CardContent>
             <CardFooter className="flex flex-col gap-5 justify-end">
-                <Button form="login-form" type="submit" className="w-full">
+                <Button form="register-form" type="submit" className="w-full">
                     Register
                 </Button>
                 <Button

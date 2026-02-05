@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/sheet";
 import Link from "next/link";
 import { ModeToggle } from "./ModeToggle";
+import { useAuth } from "@/providers/auth-provider";
+import { SignOutButton } from "../modules/authentication/sign-out-button";
 
 interface MenuItem {
   title: string;
@@ -52,7 +54,11 @@ interface Navbar1Props {
   };
 }
 
+
 const Navbar = ({
+
+
+
   logo = {
     url: "/",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
@@ -80,6 +86,10 @@ const Navbar = ({
   },
   className,
 }: Navbar1Props) => {
+
+  const { user } = useAuth();
+
+  console.log(user);
   return (
     <section className={cn("py-4 ", className)}>
       <div className="container mx-auto px-4">
@@ -107,12 +117,19 @@ const Navbar = ({
           </div>
           <div className="flex gap-2">
             <ModeToggle />
-            <Button asChild variant="outline" size="sm">
-              <Link href={auth.login.url}>{auth.login.title}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href={auth.signup.url}>{auth.signup.title}</Link>
-            </Button>
+            {
+              user ? <SignOutButton /> :
+                <>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={auth.login.url}>{auth.login.title}</Link>
+                  </Button>
+                  <Button asChild size="sm">
+                    <Link href={auth.signup.url}>{auth.signup.title}</Link>
+                  </Button>
+                </>
+            }
+
+
           </div>
         </nav>
 

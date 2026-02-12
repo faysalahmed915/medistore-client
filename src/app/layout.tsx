@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { AuthProvider } from "@/providers/auth-provider";
 import { getServerSession } from "@/lib/auth-server";
+import QueryProviders from "@/providers/queryProvider";
 // import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -41,9 +42,11 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
-            {children}
-            <Toaster richColors />
+            <QueryProviders>
+              <Navbar />
+              {children}
+              <Toaster richColors />
+            </QueryProviders>
           </ThemeProvider>
         </AuthProvider>
       </body>

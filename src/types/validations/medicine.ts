@@ -14,3 +14,30 @@ export const medicineSchema = z.object({
 });
 
 export type MedicineFormValues = z.infer<typeof medicineSchema>;
+
+export type Medicine = z.infer< typeof medicineSchema> & {
+    id: string;
+    isAvailable: boolean;};
+
+
+
+export const getAllMedicinesQuerySchema = z.object({
+    search: z.string().optional(),
+    category: z.string().optional(),
+    manufacturer: z.string().optional(),
+    // z.coerce.number() স্ট্রিং "50" কে অটো 50 বানিয়ে দিবে
+    minPrice: z.coerce.number().optional(),
+    maxPrice: z.coerce.number().optional(),
+    // Boolean conversion logic
+    isAvailable: z.preprocess(
+        (val) => val === 'true' ? true : val === 'false' ? false : undefined,
+        z.boolean().optional()
+    ),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).default(10),
+    sortBy: z.string().default("createdAt"),
+    sortOrder: z.enum(["asc", "desc"]).default("desc"),
+});
+
+
+export type GetAllMedicinesOptions = z.infer<typeof getAllMedicinesQuerySchema>;

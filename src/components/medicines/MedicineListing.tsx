@@ -15,6 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Medicine } from "@/types/validations/medicine";
 import { MedicineService } from "@/services/medicine";
 
+import Link from "next/link";
+
 export default function MedicineListing() {
     // --- States ---
     const [page, setPage] = useState(1);
@@ -126,7 +128,7 @@ export default function MedicineListing() {
                             onValueChange={(val) => setSortOrder(val as "asc" | "desc")}
                             defaultValue={sortOrder}
                         >
-                            <SelectTrigger className="w-[140px]">
+                            <SelectTrigger className="w-35">
                                 <SelectValue placeholder="Price Order" />
                             </SelectTrigger>
                             <SelectContent>
@@ -161,7 +163,9 @@ export default function MedicineListing() {
                                     </div>
                                 </CardContent>
                                 <CardFooter className="p-4">
+                                    <Link href={`/medicines/${med.id}`} className="w-full">
                                     <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white" variant="default">View Details</Button>
+                                    </Link>
                                 </CardFooter>
                             </Card>
                         ))}

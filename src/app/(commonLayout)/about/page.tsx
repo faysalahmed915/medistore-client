@@ -16,7 +16,7 @@ const about = () => {
             <SignOutButton />
 
             {/* <AddMedicineForm /> */}
-<MedicineListing />
+{/* <MedicineListing /> */}
 
 
         </div>

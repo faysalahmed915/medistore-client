@@ -19,7 +19,10 @@ export function SignOutButton() {
   };
 
   return (
-    <Button onClick={handleSignOut} className="text-red-500">
+    <Button onClick={handleSignOut}
+    className="text-amber-600"
+    variant="ghost" 
+    >
       Sign Out
     </Button>
   );

@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; 
 import { MedicineService } from "@/services/medicine";
-import { useParams } from "next/navigation";
+
+
 import { 
   Loader2, 
   ShoppingCart, 
@@ -11,7 +12,8 @@ import {
   Stethoscope, 
   Factory, 
   Layers, 
-  Info 
+  Info, 
+  CreditCard
 } from "lucide-react";
 
 // Shadcn Components
@@ -20,24 +22,37 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-
-
+import { toast } from "sonner"; 
+import { CartService } from "@/services/cart";
 
 interface MedicineDetailsProps {
   id: string;
 }
 
-
 export default function ViewMedicineDetails({ id }: MedicineDetailsProps) {
-//   const { id } = useParams();
-//   const { id } = useParams() as { id: string };
+  const queryClient = useQueryClient();
 
+  // ১. সব Hooks কম্পোনেন্টের একদম শুরুতে রাখতে হবে
   const { data: medicine, isLoading, isError } = useQuery({
     queryKey: ["medicine", id],
     queryFn: () => MedicineService.getById(id as string),
-    enabled: !!id,
+    enabled: !!id,    
   });
 
+  const mutation = useMutation({
+    mutationFn: (data: { medicineId: string; quantity: number }) => 
+      CartService.addToCart(data.medicineId, data.quantity),
+    onSuccess: () => {
+      // সাকসেস হলে কার্ট রিফেচ করবে
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      toast.success("Added to cart successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to add item to cart.");
+    }
+  });
+
+  // ২. Hooks এর পর Early Returns (Loading/Error states)
   if (isLoading) {
     return (
       <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
@@ -58,9 +73,13 @@ export default function ViewMedicineDetails({ id }: MedicineDetailsProps) {
     );
   }
 
+  // ৩. হ্যান্ডলার ফাংশনস
   const handleAddToCart = () => {
-    // এখানে আপনার Zustand বা Cart লজিক বসবে
-    console.log("Added to cart:", medicine.name);
+    mutation.mutate({ medicineId: id, quantity: 1 });
+  };
+
+  const handleOrderNow = () => {
+    console.log("Proceeding to order:", medicine.name);
   };
 
   return (
@@ -109,7 +128,6 @@ export default function ViewMedicineDetails({ id }: MedicineDetailsProps) {
 
           <Separator />
 
-          {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-3 p-3 border rounded-lg bg-slate-50/50">
               <Stethoscope className="text-blue-500" size={20} />
@@ -127,7 +145,6 @@ export default function ViewMedicineDetails({ id }: MedicineDetailsProps) {
             </div>
           </div>
 
-          {/* Description */}
           <Card className="bg-slate-50/30 border-none shadow-none">
             <CardContent className="p-4 space-y-2">
               <h4 className="font-semibold flex items-center gap-2 italic text-slate-700">
@@ -139,16 +156,30 @@ export default function ViewMedicineDetails({ id }: MedicineDetailsProps) {
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button 
               size="lg" 
-              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white h-14 text-lg"
+              variant="outline"
+              className="flex-1 h-14 text-lg border-slate-900 text-slate-900 hover:bg-slate-50"
               onClick={handleAddToCart}
+              disabled={!medicine.isAvailable || mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <Loader2 className="mr-2 animate-spin" size={20} />
+              ) : (
+                <ShoppingCart className="mr-2" size={20} />
+              )}
+              Add to Cart
+            </Button>
+
+            <Button 
+              size="lg" 
+              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white h-14 text-lg shadow-lg"
+              onClick={handleOrderNow}
               disabled={!medicine.isAvailable}
             >
-              <ShoppingCart className="mr-2" size={20} />
-              Add to Cart
+              <CreditCard className="mr-2" size={20} />
+              Order Now
             </Button>
           </div>
           

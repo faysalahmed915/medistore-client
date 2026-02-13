@@ -78,6 +78,10 @@ const Navbar = ({
       url: "/about",
     },
     {
+      title: "Checkout",
+      url: "/checkout",
+    },
+    {
       title: "Dashboard",
       url: "/dashboard",
     },

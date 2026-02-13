@@ -24,7 +24,7 @@ interface CartStore {
   items: CartItem[];
   totalItems: number;
   totalPrice: number;
-  setCart: (cartData: CartResponse | null) => void; // any এর বদলে CartResponse
+  setCart: (cartData: CartResponse | null) => void; 
   clearCart: () => void;
 }
 

@@ -1,4 +1,4 @@
-import MedicineListing from '@/components/medicines/MedicineListing';
+import MedicineListing from '@/components/modules/medicines/MedicineListing';
 import React from 'react';
 
 const medicines = () => {

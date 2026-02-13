@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Menu, ShoppingCart } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,8 @@ import Link from "next/link";
 import { ModeToggle } from "./ModeToggle";
 import { useAuth } from "@/providers/auth-provider";
 import { SignOutButton } from "../modules/authentication/sign-out-button";
+import { CartDrawer } from "../modules/cart/CartDrawer";
+import { useCartStore } from "@/store/useCartStore";
 
 interface MenuItem {
   title: string;
@@ -88,6 +90,7 @@ const Navbar = ({
 }: Navbar1Props) => {
 
   const { user } = useAuth();
+  const totalItems = useCartStore((state) => state.totalItems);
 
   console.log(user);
   return (
@@ -116,6 +119,19 @@ const Navbar = ({
             </div>
           </div>
           <div className="flex gap-2">
+            {/* --- Cart Icon Desktop --- */}
+            <CartDrawer>
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="size-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </CartDrawer>
+
+
             <ModeToggle />
             {
               user ? <SignOutButton /> :
@@ -136,52 +152,59 @@ const Navbar = ({
         {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
-              <img
-                src={logo.src}
-                className="max-h-8 dark:invert"
-                alt={logo.alt}
-              />
-            </a>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
-                      <img
-                        src={logo.src}
-                        className="max-h-8 dark:invert"
-                        alt={logo.alt}
-                      />
-                    </a>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-6 p-4">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
-                  >
-                    {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
+            <Link href={logo.url} className="flex items-center gap-2">
+              <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
+            </Link>
 
-                  <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <Link href={auth.login.url}>{auth.login.title}</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link href={auth.signup.url}>{auth.signup.title}</Link>
-                    </Button>
+            <div className="flex items-center gap-2">
+              {/* --- Cart Icon Mobile --- */}
+              <CartDrawer>
+                <Button variant="ghost" size="icon" className="relative mr-2">
+                  <ShoppingCart className="size-5" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                      {totalItems}
+                    </span>
+                  )}
+                </Button>
+              </CartDrawer>
+
+              <ModeToggle />
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="size-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>
+                      <Link href={logo.url} className="flex items-center gap-2">
+                        <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
+                      </Link>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-6 p-4">
+                    <Accordion type="single" collapsible className="flex w-full flex-col gap-4">
+                      {menu.map((item) => renderMobileMenuItem(item))}
+                    </Accordion>
+
+                    {!user && (
+                      <div className="flex flex-col gap-3">
+                        <Button asChild variant="outline">
+                          <Link href={auth.login.url}>{auth.login.title}</Link>
+                        </Button>
+                        <Button asChild>
+                          <Link href={auth.signup.url}>{auth.signup.title}</Link>
+                        </Button>
+                      </div>
+                    )}
+                    {user && <SignOutButton />}
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>

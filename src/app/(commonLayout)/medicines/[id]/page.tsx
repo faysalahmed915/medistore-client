@@ -1,5 +1,5 @@
 
-import ViewMedicineDetails from "@/components/medicines/ViewMedicineDetails";
+import ViewMedicineDetails from "@/components/modules/medicines/ViewMedicineDetails";
 import { Metadata } from "next";
 
 // TypeScript interface for the page props

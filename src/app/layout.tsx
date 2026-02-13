@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { AuthProvider } from "@/providers/auth-provider";
 import { getServerSession } from "@/lib/auth-server";
 import QueryProviders from "@/providers/queryProvider";
+import { CartInitializer } from "@/components/modules/cart/CartInitializer";
 // import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -43,6 +44,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <QueryProviders>
+              <CartInitializer />
               <Navbar />
               {children}
               <Toaster richColors />

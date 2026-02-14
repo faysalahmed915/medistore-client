@@ -25,6 +25,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { SignOutButton } from "../modules/authentication/sign-out-button";
 import { CartDrawer } from "../modules/cart/CartDrawer";
 import { useCartStore } from "@/store/useCartStore";
+import { UserSchema } from "@/types/validations/user";
 
 interface MenuItem {
   title: string;
@@ -93,10 +94,26 @@ const Navbar = ({
   className,
 }: Navbar1Props) => {
 
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: UserSchema | null };
+  // const { user } = useAuth() as { user: { role?: string } } ;
+
+  // if (isLoading) {
+  //   console.log("loading");
+  // }
   const totalItems = useCartStore((state) => state.totalItems);
 
-  console.log(user);
+  // console.log(user);
+
+
+  // --- ফিল্টারিং লজিক ---
+  const filteredMenu = menu.filter((item) => {
+    if (item.title === "Dashboard") {
+      return user?.role === "SELLER" || user?.role === "ADMIN";
+    }
+    return true; 
+  });
+
+
   return (
     <section className={cn("py-4 ", className)}>
       <div className="container mx-auto px-4">
@@ -117,7 +134,7 @@ const Navbar = ({
             <div className="flex items-center">
               <NavigationMenu>
                 <NavigationMenuList>
-                  {menu.map((item) => renderMenuItem(item))}
+                  {filteredMenu.map((item) => renderMenuItem(item))}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>

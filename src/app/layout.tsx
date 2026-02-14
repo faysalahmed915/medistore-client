@@ -45,7 +45,7 @@ export default async function RootLayout({
           >
             <QueryProviders>
               <CartInitializer />
-              <Navbar />
+              {/* <Navbar /> */}
               {children}
               <Toaster richColors />
             </QueryProviders>

@@ -83,8 +83,12 @@ const Navbar = ({
       url: "/checkout",
     },
     {
-      title: "Dashboard",
-      url: "/dashboard",
+      title: "Profile",
+      url: "/profile",
+    },
+    {
+      title: "My Orders",
+      url: "/my-orders",
     },
   ],
   auth = {

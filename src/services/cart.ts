@@ -12,7 +12,9 @@ export const CartService = {
 
   // ইউজারের বর্তমান কার্টের সব আইটেম নিয়ে আসা
   getMyCart: async () => {
+    // console.log('get my cart');
     const { data } = await axiosInstance.get("/api/cart");
+    // console.log(data);
     return data;
   },
 

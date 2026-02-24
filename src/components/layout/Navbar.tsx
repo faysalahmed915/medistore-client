@@ -26,6 +26,7 @@ import { SignOutButton } from "../modules/authentication/sign-out-button";
 import { CartDrawer } from "../modules/cart/CartDrawer";
 import { useCartStore } from "@/store/useCartStore";
 import { UserSchema } from "@/types/validations/user";
+import { useCart } from "@/hooks/use-cart";
 
 interface MenuItem {
   title: string;
@@ -104,7 +105,13 @@ const Navbar = ({
   // if (isLoading) {
   //   console.log("loading");
   // }
-  const totalItems = useCartStore((state) => state.totalItems);
+  // const totalItems = useCartStore((state) => state.totalItems);
+
+
+const { data: cartResponse, isLoading } = useCart();
+  
+  // কার্টে কয়টি আইটেম আছে তার হিসাব (Derived State)
+  const cartItemCount = cartResponse?.data?.items?.length || 0;
 
   // console.log(user);
 
@@ -148,9 +155,9 @@ const Navbar = ({
             <CartDrawer>
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="size-5" />
-                {totalItems > 0 && (
+                {cartItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                    {totalItems}
+                    {cartItemCount}
                   </span>
                 )}
               </Button>
@@ -186,9 +193,9 @@ const Navbar = ({
               <CartDrawer>
                 <Button variant="ghost" size="icon" className="relative mr-2">
                   <ShoppingCart className="size-5" />
-                  {totalItems > 0 && (
+                  {cartItemCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                      {totalItems}
+                      {cartItemCount}
                     </span>
                   )}
                 </Button>

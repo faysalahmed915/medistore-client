@@ -31,4 +31,14 @@ export const CartService = {
     });
     return data;
   },
+
+
+  // নতুন: পুরো কার্ট একবারে খালি করা (নতুন যোগ করা হয়েছে) // [Inline Comment]
+  clearCart: async () => {
+    const { data } = await axiosInstance.delete("/api/cart/clear/all");
+    return data;
+  },
+
+
+  
 };

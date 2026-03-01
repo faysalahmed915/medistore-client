@@ -48,6 +48,7 @@ export function LoginForm({ ...props }: React.ComponentProps<typeof Card>) {
             const toastId = toast.loading("Logging in");
             try {
                 const { data, error } = await authClient.signIn.email(value);
+                console.log(data);
 
                 if (error) {
                     toast.error(error.message, { id: toastId });
@@ -57,6 +58,7 @@ export function LoginForm({ ...props }: React.ComponentProps<typeof Card>) {
                 toast.success("User Logged in Successfully", { id: toastId });
             } catch (err) {
                 toast.error("Something went wrong, please try again.", { id: toastId });
+                console.log(err);
             }
         },
     });

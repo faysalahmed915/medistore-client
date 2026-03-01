@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 
-// ১. আইটেমের জন্য টাইপ
 interface CartItem {
   id: string;
   quantity: number;
+  createdAt: string; // [নোট: নিশ্চিত করুন আপনার ব্যাকএন্ড থেকে createdAt আসছে]
   medicine: {
     id: string;
     name: string;
@@ -12,14 +12,12 @@ interface CartItem {
   };
 }
 
-// ২. এপিআই থেকে আসা রেসপন্স ডাটার টাইপ
 interface CartResponse {
   id: string;
   userId: string;
   items: CartItem[];
 }
 
-// ৩. স্টোরের মূল ইন্টারফেস
 interface CartStore {
   items: CartItem[];
   totalItems: number;
@@ -34,14 +32,17 @@ export const useCartStore = create<CartStore>((set) => ({
   totalPrice: 0,
 
   setCart: (cartData) => {
-    // যদি cartData না থাকে তবে ডিফল্ট খালি অ্যারে
-    const items = cartData?.items || [];
+    const rawItems = cartData?.items || [];
     
-    // টাইপ সেফ রিডিউসার
-    const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
-    const totalPrice = items.reduce((acc, item) => acc + (item.quantity * item.medicine.price), 0);
+    // তৈরি হওয়ার সময় অনুযায়ী সর্টিং (Ascending Order - পুরাতন থেকে নতুন)
+    const sortedItems = [...rawItems].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
     
-    set({ items, totalItems, totalPrice });
+    const totalItems = sortedItems.reduce((acc, item) => acc + item.quantity, 0);
+    const totalPrice = sortedItems.reduce((acc, item) => acc + (item.quantity * item.medicine.price), 0);
+    
+    set({ items: sortedItems, totalItems, totalPrice });
   },
 
   clearCart: () => set({ items: [], totalItems: 0, totalPrice: 0 }),

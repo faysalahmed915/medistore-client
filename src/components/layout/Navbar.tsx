@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Menu, ShoppingCart } from "lucide-react";
@@ -23,8 +24,7 @@ import Link from "next/link";
 import { ModeToggle } from "./ModeToggle";
 import { useAuth } from "@/providers/auth-provider";
 import { SignOutButton } from "../modules/authentication/sign-out-button";
-import { CartDrawer } from "../modules/cart/CartDrawer";
-import { useCartStore } from "@/store/useCartStore";
+// import { CartDrawer } from "../modules/cart/CartDrawer";
 import { UserSchema } from "@/types/validations/user";
 import { useCart } from "@/hooks/use-cart";
 
@@ -108,8 +108,8 @@ const Navbar = ({
   // const totalItems = useCartStore((state) => state.totalItems);
 
 
-const { data: cartResponse, isLoading } = useCart();
-  
+  const { data: cartResponse} = useCart();
+
   // কার্টে কয়টি আইটেম আছে তার হিসাব (Derived State)
   const cartItemCount = cartResponse?.data?.items?.length || 0;
 
@@ -121,7 +121,7 @@ const { data: cartResponse, isLoading } = useCart();
     if (item.title === "Dashboard") {
       return user?.role === "SELLER" || user?.role === "ADMIN";
     }
-    return true; 
+    return true;
   });
 
 
@@ -152,7 +152,8 @@ const { data: cartResponse, isLoading } = useCart();
           </div>
           <div className="flex gap-2">
             {/* --- Cart Icon Desktop --- */}
-            <CartDrawer>
+            {/* <CartDrawer> */}
+            <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="size-5" />
                 {cartItemCount > 0 && (
@@ -161,7 +162,8 @@ const { data: cartResponse, isLoading } = useCart();
                   </span>
                 )}
               </Button>
-            </CartDrawer>
+            </Link>
+            {/* </CartDrawer> */}
 
 
             <ModeToggle />
@@ -181,6 +183,13 @@ const { data: cartResponse, isLoading } = useCart();
           </div>
         </nav>
 
+
+
+
+
+
+
+
         {/* Mobile Menu */}
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
@@ -190,7 +199,7 @@ const { data: cartResponse, isLoading } = useCart();
 
             <div className="flex items-center gap-2">
               {/* --- Cart Icon Mobile --- */}
-              <CartDrawer>
+              <Link href = "/cart">
                 <Button variant="ghost" size="icon" className="relative mr-2">
                   <ShoppingCart className="size-5" />
                   {cartItemCount > 0 && (
@@ -199,7 +208,7 @@ const { data: cartResponse, isLoading } = useCart();
                     </span>
                   )}
                 </Button>
-              </CartDrawer>
+              </Link>
 
               <ModeToggle />
 

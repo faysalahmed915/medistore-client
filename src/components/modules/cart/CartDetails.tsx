@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner"; // এরর বা সাকসেস মেসেজের জন্য
+import NoCartItem from "./NoCartItem";
 
 export default function CartDetails() {
   const queryClient = useQueryClient();
@@ -80,18 +81,7 @@ export default function CartDetails() {
       </div>
 
       {items.length === 0 ? (
-        <Card className="border-dashed bg-slate-50/50">
-          <CardContent className="flex flex-col items-center justify-center py-20">
-            <div className="bg-white p-6 rounded-full shadow-sm mb-4">
-              <ShoppingBag size={48} className="text-slate-300" />
-            </div>
-            <h2 className="text-xl font-semibold italic">Your cart is currently empty.</h2>
-            <p className="text-muted-foreground mb-6">Start adding OTC medicines to your cart!</p>
-            <Link href="/medicines">
-              <Button size="lg">Browse Products</Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <NoCartItem />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Items List */}
@@ -203,9 +193,11 @@ export default function CartDetails() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-3">
+                <Link href="/checkout">
                 <Button className="w-full h-12 text-md font-semibold bg-slate-900 shadow-lg" size="lg">
                   Checkout Now
                 </Button>
+                </Link>
                 <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground mt-2">
                   <span className="flex items-center gap-1">🛡️ Secure Payment</span>
                   <span>•</span>

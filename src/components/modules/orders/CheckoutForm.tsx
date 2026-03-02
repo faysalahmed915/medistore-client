@@ -63,10 +63,7 @@ export default function CheckoutForm() {
     if (items.length === 0) return null;
 
     return (
-        <Card className="border-primary/10 shadow-lg">
-            <CardHeader>
-                <CardTitle className="text-xl">Shipping & Payment</CardTitle>
-            </CardHeader>
+        <Card className="border-primary/10 shadow-lg">            
             <form
                 onSubmit={(e) => {
                     e.preventDefault();

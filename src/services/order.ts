@@ -12,12 +12,12 @@ interface ApiResponse<T> {
 export const OrderService = {
   // orderData: any এর বদলে OrderFormValues ব্যবহার করা হলো
   createOrder: async (orderData: OrderFormValues): Promise<ApiResponse<Order>> => {
-    const { data } = await axiosInstance.post<ApiResponse<Order>>("/orders", orderData);
+    const { data } = await axiosInstance.post<ApiResponse<Order>>("/api/orders", orderData);
     return data;
   },
 
   getMyOrders: async (): Promise<ApiResponse<Order[]>> => {
-    const { data } = await axiosInstance.get<ApiResponse<Order[]>>("/orders/my-orders");
+    const { data } = await axiosInstance.get<ApiResponse<Order[]>>("/api/orders/my-orders");
     return data;
   },
 };

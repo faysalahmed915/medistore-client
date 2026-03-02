@@ -40,3 +40,21 @@ export type Order = {
   createdAt: Date | string;
   updatedAt: Date | string;
 };
+
+
+
+export interface OrderItem {
+  id: string;
+  quantity: number;
+  unitPrice: number;
+  orderId: string;
+  medicineId: string;
+  medicine: {
+    id: string;
+    name: string;
+    price: number;
+    image: string | null;
+    manufacturer?: string;
+    strength?: string;
+  };
+}

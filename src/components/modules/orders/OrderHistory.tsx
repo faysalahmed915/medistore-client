@@ -4,22 +4,16 @@ import { useQuery } from "@tanstack/react-query";
 import { OrderService } from "@/services/order";
 import {
   Package,
-  Calendar,
-  MapPin,
-  ChevronRight,
   Clock,
   CheckCircle2,
   Truck,
-  AlertCircle
+  AlertCircle,
+  Package2
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 import OrderHistorySkeleton from "./OrderHistorySkeleton";
 import NoOrder from "./NoOrder";
 import MyOrders from "./MyOrders";
+import PendingOrders from "./pendingOrders";
 
 // অর্ডার স্ট্যাটাস অনুযায়ী কালার কোড
 const OrderStatusConfig = {
@@ -37,20 +31,19 @@ export default function OrderHistory() {
       queryFn: () => OrderService.getMyOrders(),
       // retry: true,
     });
+  // console.log(isError);
 
   const orders = data?.data || [];
 
-  console.log(orders);
 
-  // if (isLoading) return <OrderHistorySkeleton />;
-
-  // if (isError) return <div className="text-center py-20 text-destructive">Failed to load orders.</div>;
+  const completedOrders = orders.filter((order) => order.orderStatus === "DELIVERED");
+  const pendingOrders = orders.filter((order) => order.orderStatus !== "DELIVERED");
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-4xl">
       <div className="flex items-center gap-3 mb-8">
-        <Package className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold tracking-tight">My Order History</h1>
+        <Package2 className="h-8 w-8 text-primary" />
+        <h1 className="text-3xl font-bold tracking-tight">Orders on Progress</h1>
       </div>
 
       {isLoading && <OrderHistorySkeleton />}
@@ -58,7 +51,17 @@ export default function OrderHistory() {
       {orders.length === 0 ? (
         <NoOrder />
       ) : (
-        <MyOrders orders={orders} OrderStatusConfig={OrderStatusConfig} />
+        <>
+          <div>
+            {pendingOrders.length > 0 && (
+              <PendingOrders pendingOrders={pendingOrders} OrderStatusConfig={OrderStatusConfig} />
+            )}
+          </div>
+
+          <div>
+            <MyOrders completedOrders={completedOrders} OrderStatusConfig={OrderStatusConfig} />
+          </div>
+        </>
       )}
     </div>
   );

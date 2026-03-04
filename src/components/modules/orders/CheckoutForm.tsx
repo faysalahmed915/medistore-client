@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
@@ -9,15 +9,30 @@ import { Loader2, CreditCard, Truck } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { OrderService } from "@/services/order";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent,  CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function CheckoutForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const queryClient = useQueryClient();
-    const { items, totalPrice, clearCart } = useCartStore();
+    const { items, clearCart } = useCartStore();
+
+
+    // পরিবর্তন: URL থেকে আসা আইডি অনুযায়ী আইটেম ফিল্টার করা
+    const selectedIdsFromUrl = searchParams.get("ids")?.split(",") || [];
+    const itemsToCheckout = selectedIdsFromUrl.length > 0
+        ? items.filter(item => selectedIdsFromUrl.includes(item.id))
+        : items;
+
+    // পরিবর্তন: শুধুমাত্র ফিল্টার করা আইটেমগুলোর দাম ক্যালকুলেট করা
+    const checkoutTotal = itemsToCheckout.reduce((acc, curr) => acc + (curr.quantity * curr.medicine.price), 0);
+
+
+
+
 
     // ১. অর্ডার তৈরি করার মিউটেশন
     const { mutate: placeOrder, isPending } = useMutation({
@@ -25,11 +40,12 @@ export default function CheckoutForm() {
         onSuccess: (response) => {
             toast.success("Order placed successfully!");
             // সাকসেস হলে ক্যাশ ইনভ্যালিড করা যাতে ডাটা রিফ্রেশ হয়
-            queryClient.invalidateQueries({ queryKey: ["cart"] }); 
+            queryClient.invalidateQueries({ queryKey: ["cart"] });
             queryClient.invalidateQueries({ queryKey: ["my-orders"] }); // অর্ডার লিস্ট রিফ্রেশ করার জন্য যোগ করা হয়েছে
-            clearCart(); 
-            router.push(`/orders/success/${response.data.id}`); 
+            clearCart();
+            router.push(`/my-orders/success/${response.data.id}`);
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onError: (error: any) => {
             // ব্যাকএন্ড থেকে আসা সুনির্দিষ্ট এরর মেসেজ (যেমন: Insufficient stock) দেখাবে
             const message = error.response?.data?.message || "Order failed. Check stock.";
@@ -46,24 +62,37 @@ export default function CheckoutForm() {
         onSubmit: async ({ value }) => {
             if (items.length === 0) return toast.error("Your cart is empty");
 
+
+
             // ব্যাকএন্ডের payload এর সাথে হুবহু মিল রেখে ডাটা ফরম্যাট
             const orderPayload = {
-                items: items.map((item) => ({
+                items: itemsToCheckout.map((item) => ({
                     medicineId: item.medicine.id,
                     quantity: item.quantity,
                 })),
                 shippingAddress: value.shippingAddress,
                 paymentMethod: value.paymentMethod, // সরাসরি COD বা CARD পাঠাবে
             };
-
+            if (value.paymentMethod === "CARD") {
+                toast.success("Card payment is currently unavailable. Cash on Delivery is used.");
+            }
             placeOrder(orderPayload);
         },
     });
 
-    if (items.length === 0) return null;
+    if (itemsToCheckout.length === 0) return (
+        <div className="text-center p-10">
+            <p>No items selected. Please go back to cart. Or check our medicines stock</p>
+            <div
+                className="flex flex-wrap mx-auto"            >
+                <Button onClick={() => router.push('/cart')} variant="link">Back to Cart</Button>
+                <Button onClick={() => router.push('/medicines')} variant="link">View Medicines</Button>
+            </div>
+        </div>
+    );
 
     return (
-        <Card className="border-primary/10 shadow-lg">            
+        <Card className="border-primary/10 shadow-lg">
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -71,7 +100,20 @@ export default function CheckoutForm() {
                     form.handleSubmit();
                 }}
             >
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
+
+                    {/* আইটেম সামারি লিস্ট (ঐচ্ছিক কিন্তু ভালো UX এর জন্য) */}
+                    <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-2">
+                        <p className="font-semibold border-b pb-1 mb-2">Order Summary ({itemsToCheckout.length} items)</p>
+                        {itemsToCheckout.map(item => (
+                            <div key={item.id} className="flex justify-between">
+                                <span>{item.medicine.name} x {item.quantity}</span>
+                                <span>৳{(item.medicine.price * item.quantity).toLocaleString()}</span>
+                            </div>
+                        ))}
+                    </div>
+
+
                     {/* শিপিং অ্যাড্রেস */}
                     <div className="space-y-2">
                         <Label htmlFor="address">Full Delivery Address</Label>
@@ -142,7 +184,7 @@ export default function CheckoutForm() {
                 <CardFooter className="flex flex-col gap-4 border-t pt-6">
                     <div className="flex justify-between w-full text-lg font-bold">
                         <span>Payable Amount</span>
-                        <span className="text-primary">৳{totalPrice.toLocaleString()}</span>
+                        <span className="text-primary">৳{checkoutTotal.toLocaleString()}</span>
                     </div>
                     <Button
                         type="submit"

@@ -1,33 +1,47 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
-import { ShoppingBag, Trash2, ArrowLeft, Plus, Minus, Loader2 } from "lucide-react";
+import { Trash2, Plus, Minus, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useCartStore } from "@/store/useCartStore";
-import { CartService } from "@/services/cart"; // ১. আপনার দেওয়া কার্ট সার্ভিস ইমপোর্ট
+import { CartService } from "@/services/cart";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner"; // এরর বা সাকসেস মেসেজের জন্য
+import { toast } from "sonner";
 import NoCartItem from "./NoCartItem";
+import CartHeader from "./CartHeader";
+import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function CartDetails() {
   const queryClient = useQueryClient();
   const { items, totalPrice } = useCartStore();
 
-  // ২. কোয়ান্টিটি আপডেট করার মিউটেশন (প্লাস/মাইনাস)
+  // সিলেক্টেড আইটেম আইডিগুলো রাখার জন্য স্টেট
+  const [selectedIds, setSelectedIds] = useState<string[]>(items.map(i => i.id));
+
   const { mutate: updateQty, isPending: isUpdating } = useMutation({
     mutationFn: ({ id, quantity }: { id: string; quantity: number }) =>
       CartService.updateQuantity(id, quantity),
     onSuccess: () => {
-      // এটি করার ফলে CartInitializer অটোমেটিক ব্যাকএন্ড থেকে নতুন ডাটা আনবে
       queryClient.invalidateQueries({ queryKey: ["cart"] });
     },
     onError: () => toast.error("Quantity update failed!"),
   });
+
+  // পরিবর্তন: সিলেক্টেড আইটেমগুলোর সাব-টোটাল ক্যালকুলেশন
+  const selectedItems = items.filter(item => selectedIds.includes(item.id));
+  const selectedTotal = selectedItems.reduce((acc, curr) => acc + (curr.quantity * curr.medicine.price), 0);
+
+  // পরিবর্তন: চেক বক্স হ্যান্ডলার
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
 
   // ৩. আইটেম রিমুভ করার মিউটেশন
   const { mutate: removeItem, isPending: isRemoving } = useMutation({
@@ -38,47 +52,12 @@ export default function CartDetails() {
     },
   });
 
-  // ৪. পুরো কার্ট ক্লিয়ার করার মিউটেশন
-  const { mutate: clearCart, isPending: isClearing } =
-    useMutation({
-      mutationFn: () => CartService.clearCart(),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
-        toast.success("cart cleared successfully");
-      },
-    });
-
 
 
   return (
     <div className="container mx-auto px-4 py-10 min-h-[80vh]">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <Link
-            href="/medicines"
-            className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1 mb-2 transition-colors"
-          >
-            <ArrowLeft size={14} /> Back to Medicines
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Shopping Cart</h1>
-          <p className="text-muted-foreground">
-            You have {items.length} items in your cart
-          </p>
-        </div>
-
-        {items.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-destructive hover:bg-destructive/10 border-destructive/20"
-            onClick={() => clearCart()}
-            disabled = {isClearing}
-          >
-            <Trash2 size={16} className="mr-2" /> Clear Cart
-          </Button>
-        )}
-      </div>
+      <CartHeader />
 
       {items.length === 0 ? (
         <NoCartItem />
@@ -90,6 +69,13 @@ export default function CartDetails() {
               <Card key={item.id} className="overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex flex-col sm:flex-row items-center gap-6 p-4">
+                    {/* পরিবর্তন: কার্ডের ভেতরে সিলেক্ট অপশন/চেকবক্স */}
+                    <div className="flex items-center px-2">
+                      <Checkbox
+                        checked={selectedIds.includes(item.id)}
+                        onCheckedChange={() => toggleSelect(item.id)}
+                      />
+                    </div>
                     <div className="relative h-24 w-24 rounded-lg bg-slate-100 overflow-hidden shrink-0 border">
                       {item.medicine.image ? (
                         <img
@@ -175,7 +161,7 @@ export default function CartDetails() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>৳{totalPrice.toLocaleString()}</span>
+                  <span>৳{selectedTotal.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Estimated Delivery</span>
@@ -188,16 +174,19 @@ export default function CartDetails() {
                     <p className="text-[10px] text-muted-foreground italic">Inc. all applicable taxes</p>
                   </div>
                   <span className="text-2xl font-black text-primary">
-                    ৳{totalPrice.toLocaleString()}
+                    ৳{selectedTotal.toLocaleString()}
                   </span>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-3">
-                <Link href="/checkout">
-                <Button className="w-full h-12 text-md font-semibold bg-slate-900 shadow-lg" size="lg">
-                  Checkout Now
-                </Button>
-                </Link>
+                {!selectedItems.length ?<Button className="w-full h-12 text-md font-semibold bg-slate-900 shadow-lg" size="lg">
+                  Select Items to CheckOut
+                </Button> : <Link href={{ pathname: '/checkout', query: { ids: selectedIds.join(',') } }} className="w-full">
+                  <Button className="w-full h-12 text-md font-semibold bg-slate-900 shadow-lg" size="lg">
+                    Checkout Now
+                  </Button>
+                </Link>}
+
                 <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground mt-2">
                   <span className="flex items-center gap-1">🛡️ Secure Payment</span>
                   <span>•</span>

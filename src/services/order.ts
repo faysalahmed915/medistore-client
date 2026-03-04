@@ -16,8 +16,13 @@ export const OrderService = {
     return data;
   },
 
-  getMyOrders: async (): Promise<ApiResponse<Order[]>> => {
+    getMyOrders: async (): Promise<ApiResponse<Order[]>> => {
     const { data } = await axiosInstance.get<ApiResponse<Order[]>>("/api/orders/my-orders");
+    return data;
+  },
+  
+  getOrderById: async (id: string): Promise<ApiResponse<Order>> => {
+    const { data } = await axiosInstance.get<ApiResponse<Order>>(`/api/orders/${id}`);
     return data;
   },
 };

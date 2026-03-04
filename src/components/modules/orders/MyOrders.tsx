@@ -1,14 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Clock, MapPin } from 'lucide-react';
+import { Order } from '@/types/validations/order';
+import { Calendar, Clock, MapPin, Package } from 'lucide-react';
 import React from 'react';
 
-const MyOrders = ({orders, OrderStatusConfig}) => {
+const MyOrders = ({completedOrders, OrderStatusConfig} : any) => {
     return (
         <div className="space-y-6">
-          {orders.map((order: any) => {
-            const StatusIcon = OrderStatusConfig[order.status as keyof typeof OrderStatusConfig]?.icon || Clock;
+
+          <div className="flex items-center gap-3 my-8">
+                <Package className="h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold tracking-tight">Orders History</h1>
+            </div>
+
+          {completedOrders.map((order: Order) => {
+            const StatusIcon = OrderStatusConfig[order.orderStatus as keyof typeof OrderStatusConfig]?.icon || Clock;
 
             return (
               <Card key={order.id} className="overflow-hidden hover:shadow-md transition-shadow">
@@ -19,9 +27,9 @@ const MyOrders = ({orders, OrderStatusConfig}) => {
                       <p className="font-mono text-sm font-bold">#{order.id.slice(-8).toUpperCase()}</p>
                     </div>
 
-                    <Badge variant="outline" className={`${OrderStatusConfig[order.status as keyof typeof OrderStatusConfig]?.color} flex gap-1 items-center px-3 py-1`}>
+                    <Badge variant="outline" className={`${OrderStatusConfig[order.orderStatus as keyof typeof OrderStatusConfig]?.color} flex gap-1 items-center px-3 py-1`}>
                       <StatusIcon size={14} />
-                      {order.status}
+                      {order.orderStatus}
                     </Badge>
                   </div>
                 </CardHeader>
